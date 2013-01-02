@@ -42,7 +42,8 @@ class AjxpLuceneIndexer extends AJXP_Plugin{
         	$this->metaFields = explode(",",$this->options["index_meta_fields"]);
         }
         if(!empty($this->options["repository_specific_keywords"])){
-            $this->specificId = "-".str_replace(",", "-", AJXP_VarsFilter::filter($this->options["repository_specific_keywords"]));
+        	$this->specificId = "-".str_replace(array(",", "/"), array("-", "__"), AJXP_VarsFilter::filter($this->options["repository_specific_keywords"]));
+//            $this->specificId = "-".str_replace(",", "-", AJXP_VarsFilter::filter($this->options["repository_specific_keywords"]));
         }
         $this->indexContent = ($this->options["index_content"] == true);
 	}
@@ -77,7 +78,8 @@ class AjxpLuceneIndexer extends AJXP_Plugin{
                 $index =  $this->loadIndex(ConfService::getRepository()->getId(), false);
             }catch(Exception $ex){
                 $this->applyAction("index", array(), array());
-                throw new Exception($messages["index.lucene.7"]);
+                //throw new Exception($messages["index.lucene.7"]);
+                return ;
             }
 			if((isSet($this->metaFields) || $this->indexContent) && isSet($httpVars["fields"])){
                 $sParts = array();

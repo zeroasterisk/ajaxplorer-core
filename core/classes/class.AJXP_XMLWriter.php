@@ -510,7 +510,12 @@ class AJXP_XMLWriter
             if(!empty($slug)){
                 $slugString = "repositorySlug=\"$slug\"";
             }
-            $isSharedString = ($repoObject->hasOwner() ? "owner='".$repoObject->getOwner()."'" : "");
+            if($repoObject->hasOwner()){
+                $uId = $repoObject->getOwner();
+                $uObject = ConfService::getConfStorageImpl()->createUserObject($uId);
+                $label = $uObject->personalRole->filterParameterValue("core.conf", "USER_DISPLAY_NAME", AJXP_REPO_SCOPE_ALL, $uId);
+                $isSharedString =  "owner='".$label."'";
+            }
 
             $xmlString = "<repo access_type=\"".$repoObject->accessType."\" id=\"".$repoId."\"$rightString $streamString $slugString $isSharedString><label>".SystemTextEncoding::toUTF8(AJXP_Utils::xmlEntities($repoObject->getDisplay()))."</label>".$repoObject->getClientSettings()."</repo>";
             if($toLast){

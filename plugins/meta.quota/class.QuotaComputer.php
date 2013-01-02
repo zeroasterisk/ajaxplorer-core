@@ -43,9 +43,22 @@ class QuotaComputer extends AJXP_Plugin
     protected function getWorkingPath(){
         $repo = ConfService::getRepository();
         if($repo->hasParent()){
+            $parentOwner = $repo->getOwner();
+            AJXP_Logger::debug("UPDATING OWNER", $parentOwner);
             $repo = ConfService::getRepositoryById($repo->getParentId());
+            $originalUser = AuthService::getLoggedUser();
+            $loggedUser = AuthService::getLoggedUser();
+            if(!$loggedUser->hasParent()){
+                $loggedUser->setParent($parentOwner);
+            }
+            $loggedUser->setResolveAsParent(true);
+            AuthService::updateUser($loggedUser);
         }
         $path = $repo->getOption("PATH");
+        AJXP_Logger::debug("PATH IS $path");
+        if(iSset($originalUser)){
+            AuthService::updateUser($originalUser);
+        }
         return $path;
     }
 

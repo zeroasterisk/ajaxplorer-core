@@ -293,10 +293,13 @@ class ajxpSharedAccessDriver extends AbstractAccessDriver
 			foreach ($users as $userId => $userObject) {
 				//if(!$userObject->hasParent()) continue;
                 if($userObject->getId() == $loggedUser->getId()) continue;
+                $uObject = ConfService::getConfStorageImpl()->createUserObject($userId);
+                $label = $uObject->personalRole->filterParameterValue("core.conf", "USER_DISPLAY_NAME", AJXP_REPO_SCOPE_ALL, $userId);
+                //$label = $userId;
 				if($userObject->canWrite($repoIndex)){
-					$repoAccesses[] = $userId." (rw)";
+					$repoAccesses[] = $label." (rw)";
 				}else if($userObject->canRead($repoIndex)){
-					$repoAccesses[] = $userId." (r)";
+					$repoAccesses[] = $label." (r)";
 				}
 			}			
             

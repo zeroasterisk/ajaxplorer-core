@@ -258,7 +258,7 @@ class IMagickPreviewer extends AJXP_Plugin {
 		}
 		$params = ($this->extractAll?"-quality ".$this->pluginConf["IM_VIEWER_QUALITY"]:"-resize 250 -quality ".$this->pluginConf["IM_THUMB_QUALITY"]);
 		$cmd = $this->pluginConf["IMAGE_MAGICK_CONVERT"]." ".escapeshellarg(($masterFile).$pageLimit)." ".$params." ".escapeshellarg($tmpFileThumb);
-		AJXP_Logger::logAction("IMagick Command : $cmd");
+		AJXP_Logger::logAction("Image Magick Command : $cmd");
 		session_write_close(); // Be sure to give the hand back
 		exec($cmd, $out, $return);
 		if(is_array($out) && count($out)){

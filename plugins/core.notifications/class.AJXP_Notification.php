@@ -71,6 +71,7 @@ class AJXP_Notification
 
     protected function getRoot($string){
         if(empty($string)) return "/";
+        return $string;
     }
 
     protected function replaceVars($tplString, $mess, $rich = true){
@@ -90,10 +91,10 @@ class AJXP_Notification
         }
         $em = ($rich ? "<em>" : "");
         $me = ($rich ? "</em>" : "");
-
+        
         $replaces = array(
             "AJXP_NODE_PATH"        => $em.$this->getRoot($this->getNode()->getPath()).$me,
-            "AJXP_NODE_LABEL"       => $em.$this->getNode()->getLabel().$me,
+            "AJXP_NODE_LABEL"       => $em.$this->getRoot($this->getNode()->getLabel()).$me,
             "AJXP_PARENT_PATH"      => $em.$this->getRoot(dirname($this->getNode()->getPath())).$me,
             "AJXP_PARENT_LABEL"     => $em.$this->getRoot(basename(dirname($this->getNode()->getPath()))).$me,
             "AJXP_REPOSITORY_ID"    => $em.$repoId.$me,

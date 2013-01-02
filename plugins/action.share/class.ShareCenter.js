@@ -199,7 +199,7 @@ Class.create("ShareCenter", {
                 }
             }.bind(this);
             conn.sendAsync();
-            closeFunc(oForm);
+            //closeFunc(oForm);
             return false;
         }.bind(this);
         if(window.ajxpBootstrap.parameters.get("usersEditable") == false){
