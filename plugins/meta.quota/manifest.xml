@@ -19,7 +19,7 @@
     </client_settings>
    	<registry_contributions>
    		<hooks>
-   			<serverCallback hookName="node.change" methodName="recomputeQuotaUsage" defer="false"/>
+   			<serverCallback hookName="node.change" methodName="recomputeQuotaUsage" defer="true"/>
    			<serverCallback hookName="node.before_change" methodName="precheckQuotaUsage"/>
    			<serverCallback hookName="node.before_create" methodName="precheckQuotaUsage"/>
    		</hooks>
@@ -33,6 +33,7 @@
                     <clientCallback><![CDATA[
                         var c = new Connexion();
                         c.setParameters(new Hash({get_action:'monitor_quota'}));
+                        c.discrete = true;
                         c.onComplete = function(transport){
                             var action = ajaxplorer.getActionBar().getActionByName("monitor_quota");
                             if(!action) return;
@@ -44,15 +45,15 @@
                     ]]></clientCallback>
                     <clientListener name="contextChange"><![CDATA[
                         if(ajaxplorer && !ajaxplorer.meta_quota_pe_created){
-                            new PeriodicalExecuter(function(pe){
-                                var action = ajaxplorer.getActionBar().getActionByName("monitor_quota");
-                                if(!action) {
-                                    pe.stop();
-                                    ajaxplorer.meta_quota_pe_created = false;
-                                    return;
-                                }
-                                ajaxplorer.getActionBar().fireAction('monitor_quota');
-                            }, 20);
+                                new PeriodicalExecuter(function(pe){
+                                    var action = ajaxplorer.getActionBar().getActionByName("monitor_quota");
+                                    if(!action) {
+                                        pe.stop();
+                                        ajaxplorer.meta_quota_pe_created = false;
+                                        return;
+                                    }
+                                    ajaxplorer.getActionBar().fireAction('monitor_quota');
+                                }, 20);
                             ajaxplorer.meta_quota_pe_created = true;
                         }
                         ]]></clientListener>
