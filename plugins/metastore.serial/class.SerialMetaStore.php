@@ -132,7 +132,9 @@ class SerialMetaStore extends AJXP_Plugin implements MetaStoreProvider {
     protected function updateSecurityScope($metaFile, $repositoryId){
 
         $repo = ConfService::getRepositoryById($repositoryId);
-        if(!is_object($repo)) return $metaFile;
+        if(!is_object($repo)) {
+            return $metaFile;
+        }
         $securityScope = $repo->securityScope();
         if($securityScope == false) return $metaFile;
 
@@ -147,7 +149,7 @@ class SerialMetaStore extends AJXP_Plugin implements MetaStoreProvider {
         }
         return $metaFile;
     }
-    
+
     /**
      * @param AJXP_Node $ajxpNode
      * @param String $scope
