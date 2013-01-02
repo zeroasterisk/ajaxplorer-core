@@ -134,7 +134,7 @@ class ShareCenter extends AJXP_Plugin{
 					header("Content-type:text/plain");
 					$result = $this->createSharedRepository($httpVars, $this->repository, $this->accessDriver);
 					print($result);
-            	}else if($subAction == "list_shared_users"){
+            	}/*else if($subAction == "list_shared_users"){
             		header("Content-type:text/html");
             		if(!ConfService::getAuthDriverImpl()->usersEditable()){
             			break;
@@ -149,7 +149,8 @@ class ShareCenter extends AJXP_Plugin{
                     $users = "";
                     $index = 0;
                     if($regexp != null && !count($allUsers)){
-                        $users .= "<li class='complete_user_entry_temp' data-temporary='true' data-label='$crtValue'><span class='user_entry_label'>$crtValue (create user)</span></li>";
+                        $mess = ConfService::getMessages();
+                        $users .= "<li class='complete_user_entry_temp' data-temporary='true' data-label='$crtValue'><span class='user_entry_label'>$crtValue (".$mess["share_center.49"].")</span></li>";
                     }
                     if(count($allGroups)){
                         if($regexp == null) $users .= "<li class='complete_group_entry' data-group='/' data-label='My Group'><span class='user_entry_label'>My Group</span></li>";
@@ -170,7 +171,7 @@ class ShareCenter extends AJXP_Plugin{
             		if(strlen($users)) {
             			print("<ul>".$users."</ul>");
             		}
-            	}else{
+            	}*/else{
 					$file = AJXP_Utils::decodeSecureMagic($httpVars["file"]);
                     if(!isSet($httpVars["downloadlimit"])){
                         $httpVars["downloadlimit"] = 0;
@@ -846,11 +847,11 @@ class ShareCenter extends AJXP_Plugin{
                 $userObject->personalRole->clearAcls();
                 $userObject->setParent($loggedUser->id);
                 $userObject->setGroupPath($loggedUser->getGroupPath());
+                $userObject->setProfile("shared");
                 AJXP_Controller::applyHook("user.after_create", array($userObject));
             }
             // CREATE USER WITH NEW REPO RIGHTS
             $userObject->personalRole->setAcl($newRepo->getUniqueId(), $uRights[$userName]);
-            $userObject->setProfile("shared");
             $userObject->save("superuser");
             if($this->watcher !== false){
                 // Register a watch on the current folder for shared user

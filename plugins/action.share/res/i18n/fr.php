@@ -43,7 +43,7 @@ $mess = array(
     "38"=> "Surveiller le contenu du répertoire",
     "39"=> "Surveiller l'activité sur ce fichier",
     "40"=> "Invitations",
-    "41"=> "Envoyer des invitations par email aux utilisateurs avec qui vous partagez",
+    "41"=> "Envoyer des invitations par email aux utilisateurs avec qui vous partagez le fichier",
     "42"=> "Un utilisateur de %s partage un lien avec vous",
     "43"=> "Un utilisateur de %s vous invite à partager un dossier",
     "44"=> "Partage %s",
@@ -51,4 +51,5 @@ $mess = array(
     "46"=> "Ouvrir le dépôt %s1 directement dans %s2",
     "47"=> "Le statut de surveillance a été changé",
     "48"=> "Vous n'êtes pas autorisé à accéder à cette donnée.",
+    "49"=> "créer l'utilisateur",
 );
