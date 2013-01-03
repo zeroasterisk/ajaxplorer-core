@@ -136,6 +136,10 @@ class fsAccessDriver extends AbstractAccessDriver implements AjxpWebdavProvider
 			}
 		}		
 	}
+
+    protected  function getNodesDiffArray(){
+        return array("REMOVE" => array(), "ADD" => array(), "UPDATE" => array());
+    }
 	
 	function switchAction($action, $httpVars, $fileVars){
 		if(!isSet($this->actions[$action])) return;
@@ -169,7 +173,7 @@ class fsAccessDriver extends AbstractAccessDriver implements AjxpWebdavProvider
 		$pendingSelection = "";
 		$logMessage = null;
 		$reloadContextNode = false;
-		
+
 		switch($action)
 		{			
 			//------------------------------------
@@ -284,7 +288,7 @@ class fsAccessDriver extends AbstractAccessDriver implements AjxpWebdavProvider
 					@rename($tmpFNAME, $this->urlBase.$dir."/".$localName);
                     AJXP_Controller::applyHook("node.change", array(null, new AJXP_Node($this->urlBase.$dir."/".$localName), false));
 					$reloadContextNode = true;
-					$pendingSelection = $localName;					
+					$pendingSelection = $localName;
 			break;
 			
 			case "stat" :
@@ -347,7 +351,8 @@ class fsAccessDriver extends AbstractAccessDriver implements AjxpWebdavProvider
 				$fp=fopen($fileName,"w");
 				fputs ($fp,$code);
 				fclose($fp);
-                AJXP_Controller::applyHook("node.change", array($currentNode, new AJXP_Node($fileName), false));
+                clearstatcache(true, $fileName);
+                AJXP_Controller::applyHook("node.change", array($currentNode, $currentNode, false));
 				header("Content-Type:text/plain");
 				print($mess[115]);
 				
@@ -501,7 +506,7 @@ class fsAccessDriver extends AbstractAccessDriver implements AjxpWebdavProvider
 				AJXP_Logger::logAction("Create File", array("file"=>$dir."/".$filename));
 				//$newNode = new AJXP_Node($this->urlBase.$dir."/".$filename);
 				//AJXP_Controller::applyHook("node.change", array(null, $newNode, false));
-		
+
 			break;
 			
 			//------------------------------------
@@ -524,8 +529,8 @@ class fsAccessDriver extends AbstractAccessDriver implements AjxpWebdavProvider
 				//$messtmp.="$mess[34] ".SystemTextEncoding::toUTF8($filename)." $mess[39] ";
 				$logMessage="Successfully changed permission to ".$chmod_value." for ".count($changedFiles)." files or folders";
 				$reloadContextNode = true;
-				AJXP_Logger::logAction("Chmod", array("dir"=>$dir, "filesCount"=>count($changedFiles)));
-		
+                AJXP_Logger::logAction("Chmod", array("dir"=>$dir, "filesCount"=>count($changedFiles)));
+
 			break;
 			
 			//------------------------------------
@@ -569,7 +574,12 @@ class fsAccessDriver extends AbstractAccessDriver implements AjxpWebdavProvider
 						$userfile_name = self::autoRenameForDest($destination, $userfile_name);
 					}
                     try {
-                        AJXP_Controller::applyHook("node.before_create", array(new AJXP_Node($this->urlBase.$dir."/".$userfile_name), $boxData["size"]));
+                        if(file_exists($destination."/".$userfile_name)){
+                            AJXP_Controller::applyHook("node.before_change", array(new AJXP_Node($destination."/".$userfile_name), $boxData["size"]));
+                        }else{
+                            AJXP_Controller::applyHook("node.before_create", array(new AJXP_Node($destination."/".$userfile_name), $boxData["size"]));
+                        }
+                        AJXP_Controller::applyHook("node.before_change", array(new AJXP_Node($destination)));
                     }catch (Exception $e){
                         $errorCode=507;
                         $errorMessage = $e->getMessage();
@@ -578,10 +588,6 @@ class fsAccessDriver extends AbstractAccessDriver implements AjxpWebdavProvider
 					if(isSet($boxData["input_upload"])){
 						try{
 							AJXP_Logger::debug("Begining reading INPUT stream");
-                            if(file_exists($destination."/".$userfile_name)){
-                                AJXP_Controller::applyHook("node.before_change", array(new AJXP_Node($destination."/".$userfile_name), $boxData["size"]));
-                            }
-                            AJXP_Controller::applyHook("node.before_change", array(new AJXP_Node($destination)));
 							$input = fopen("php://input", "r");
 							$output = fopen("$destination/".$userfile_name, "w");
 							$sizeRead = 0;
@@ -599,14 +605,6 @@ class fsAccessDriver extends AbstractAccessDriver implements AjxpWebdavProvider
 							break;
 						}
 					}else{
-                        try {
-                            AJXP_Controller::applyHook("before_create", array(new AJXP_Node($destination."/".$userfile_name), $boxData["size"]));
-                        }catch (Exception $e){
-                            $errorCode=411;
-                            $errorMessage = $e->getMessage();
-             				break;
-                        }
-
                         $result = @move_uploaded_file($boxData["tmp_name"], "$destination/".$userfile_name);
                         if(!$result){
                             $realPath = call_user_func(array($this->wrapperClassName, "getRealFSReference"),"$destination/".$userfile_name);
@@ -638,7 +636,8 @@ class fsAccessDriver extends AbstractAccessDriver implements AjxpWebdavProvider
                     }
 
 					$this->changeMode($destination."/".$userfile_name);
-                    AJXP_Controller::applyHook("node.change", array(null, new AJXP_Node($destination."/".$userfile_name), false));
+                    $createdNode = new AJXP_Node($destination."/".$userfile_name);
+                    AJXP_Controller::applyHook("node.change", array(null, $createdNode, false));
 					$logMessage.="$mess[34] ".SystemTextEncoding::toUTF8($userfile_name)." $mess[35] $dir";
 					AJXP_Logger::logAction("Upload File", array("file"=>SystemTextEncoding::fromUTF8($dir)."/".$userfile_name));
 				}
@@ -858,7 +857,7 @@ class fsAccessDriver extends AbstractAccessDriver implements AjxpWebdavProvider
 		if(isSet($reloadDataNode)){
 			$xmlBuffer .= AJXP_XMLWriter::reloadDataNode($reloadDataNode, "", false);
 		}
-					
+
 		return $xmlBuffer;
 	}
 			
