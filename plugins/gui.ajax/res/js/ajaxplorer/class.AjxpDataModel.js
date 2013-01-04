@@ -55,7 +55,15 @@ Class.create("AjxpDataModel", {
 	setAjxpNodeProvider : function(iAjxpNodeProvider){
 		this._iAjxpNodeProvider = iAjxpNodeProvider;
 	},
-	
+
+    /**
+     * Return the current data source provider
+     * @return IAjxpNodeProvider
+     */
+	getAjxpNodeProvider : function(){
+		return this._iAjxpNodeProvider;
+	},
+
 	/**
 	 * Changes the current context node.
 	 * @param ajxpNode AjxpNode Target node, either an existing one or a fake one containing the target part.
@@ -138,6 +146,30 @@ Class.create("AjxpDataModel", {
 		}
 	},
 
+    requireNodeReload: function(nodeOrPath){
+        if(Object.isString(nodeOrPath)){
+            nodeOrPath = new AjxpNode(nodeOrPath);
+        }
+        var onComplete = null;
+        if(this._selectedNodes.length) {
+            var found = false;
+            this._selectedNodes.each(function(node){
+                if(node.getPath() == nodeOrPath.getPath()) found = node;
+            });
+            if(found){
+                // TODO : MAKE SURE SELECTION IS OK AFTER RELOAD
+                this._selectedNodes = this._selectedNodes.without(found);
+                this.publish("selection_changed", this);
+                onComplete = function(newNode){
+                    this._selectedNodes.push(newNode);
+                    this._selectionSource = {};
+                    this.publish("selection_changed", this);
+                }.bind(this);
+            }
+        }
+        this._iAjxpNodeProvider.refreshNodeAndReplace(nodeOrPath, onComplete);
+    },
+
     loadPathInfoSync: function (path, callback){
         this._iAjxpNodeProvider.loadLeafNodeSync(new AjxpNode(path), callback);
     },
@@ -160,7 +192,7 @@ Class.create("AjxpDataModel", {
 	 * Gets the current root node
 	 * @returns AjxpNode
 	 */
-	getRootNode : function(ajxpRootNode){
+	getRootNode : function(){
 		return this._rootNode;
 	},
 	
@@ -364,7 +396,18 @@ Class.create("AjxpDataModel", {
 	isEmpty : function (){
 		return (this._selectedNodes?(this._selectedNodes.length==0):true);
 	},
-	
+
+    hasReadOnly : function(){
+        var test = false;
+        this._selectedNodes.each(function(node){
+            if(node.hasMetadataInBranch("ajxp_readonly", "true")) {
+                test = true;
+                throw $break;
+            }
+        });
+        return test;
+    },
+
 	/**
 	 * Whether the selection is unique
 	 * @returns Boolean
