@@ -23,6 +23,25 @@
  */
 define("AJXP_PACKAGING", "zip");
 define("AJXP_INSTALL_PATH", realpath(dirname(__FILE__)));
-define("AJXP_CONF_PATH", AJXP_INSTALL_PATH."/conf");
+/**
+ * in an effort to secure the conf (and get out of the repository)
+ * look for a ajaxplorer_conf directory in any level parent from the current
+ * file/dir... this allows you to easily create customized configs outside of
+ * your webroot
+ *
+ * mv conf ../../ajaxplorer_conf
+ */
+$confPath = realpath(dirname(__FILE__)) . '/ajaxplorer_conf';
+$i = 0;
+while ($i < 5 && trim($confPath, '/\:') != 'ajaxplorer_conf' && (!file_exists($confPath) || !is_dir($confPath))) {
+	$i++;
+	$confPath = dirname(dirname($confPath)) . '/ajaxplorer_conf';
+}
+// couldn't find a valid ajaxplorer_conf directory?  load from this folder
+if (empty($confPath) || !file_exists($confPath) || !is_dir($confPath)) {
+	$confPath = AJXP_INSTALL_PATH."/conf";
+}
+define("AJXP_CONF_PATH", $confPath);
+// load the rest of the configurations
 require_once(AJXP_CONF_PATH."/bootstrap_context.php");
 ?>
