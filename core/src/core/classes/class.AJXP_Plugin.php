@@ -167,7 +167,7 @@ class AJXP_Plugin implements Serializable{
 			$regNode = $regNodes->item($i);
 			if($regNode->nodeType != XML_ELEMENT_NODE) continue;
 			if($regNode->nodeName == "external_file"){
-				$data = $this->nodeAttrToHash($regNode);
+				$data = array_merge(array('filename' => '', 'include' => '*', 'exclude' => ''), $this->nodeAttrToHash($regNode));
 				$filename = $data["filename"] OR "";
 				$include = $data["include"] OR "*";
 				$exclude = $data["exclude"] OR "";			
